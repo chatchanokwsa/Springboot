@@ -1,12 +1,18 @@
 package com.example.demo;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.jws.soap.SOAPBinding;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
 @RestController
 public class UserController {
+
+    @Autowired
+    private UserRepository userRepository;
 
     @GetMapping("/users")
     public PagingResponse getAllUser(@RequestParam(defaultValue = "1") int page,
@@ -28,9 +34,20 @@ public class UserController {
         return new UserResponse(id, "User " + id);
     }
 
-    @PostMapping("/users")
+    @PostMapping("/users-post")
     public UserResponse createNewUser(@RequestBody NewUserRequest request) {
-        return new UserResponse(0, request.getName() + request.getAge());
+        // Validate input
+        //Create new user into database =>move to other service
+        User user = new User();
+        user.setName(request.getName());
+        user.setAge(request.getAge());
+        user  = userRepository.save(user);
+        return new UserResponse(user.getId(), user.getName() + user.getAge());
+    }
+
+    @PostMapping("/users1")
+    public String createNewUserWithFormData(NewUserRequest request) {
+        return request.getName() + request.getAge();
     }
 
 }
